@@ -1,0 +1,19 @@
+server:
+  port: 8091
+  servlet:
+    context-path: /monitoring-tool-notification-ms
+logging:
+  level:
+    root: INFO
+spring:
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: soporteactivate2022@gmail.com
+    password: eyhrfqrreyetmjah
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
