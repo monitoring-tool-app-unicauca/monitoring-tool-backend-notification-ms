@@ -23,7 +23,7 @@ import java.util.concurrent.Executors;
 
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
-public class EmailNotificationServiceImpl implements INotificationService {
+public class EmailNotificationSenderServiceImpl implements INotificationSenderService {
 
     private final JavaMailSender emailSender;
     private final ResourceLoader resourceLoader;
@@ -52,7 +52,7 @@ public class EmailNotificationServiceImpl implements INotificationService {
         try {
             MimeMessage message = createMimeMessage(MessageLoader.getInstance().getMessage(MessagesConstants.IM002),
                     recipient.getEmail(),MessageLoader.getInstance().getMessage(MessagesConstants.IM003)
-                    ,createPasswordRecoveryEmailBody(payload));
+                    ,createPasswordRecoveryEmailBody(payload), null);
             emailSender.send(message);
         } catch (MessagingException e) {
             handleEmailException(e, recipient);
@@ -69,14 +69,15 @@ public class EmailNotificationServiceImpl implements INotificationService {
         try {
             MimeMessage message = createMimeMessage(MessageLoader.getInstance().getMessage(MessagesConstants.IM002),
                     recipient.getEmail(),MessageLoader.getInstance().getMessage(MessagesConstants.IM001,
-                            payload.getStatus()), createHealthEndpointEmailBody(payload, recipient));
+                            payload.getStatus()), createHealthEndpointEmailBody(payload, recipient),
+                    "classpath:templates/image-notification.png");
             emailSender.send(message);
         } catch (MessagingException e) {
             handleEmailException(e, recipient);
         }
     }
 
-    private MimeMessage createMimeMessage(String from, String to, String subject, String body)
+    private MimeMessage createMimeMessage(String from, String to, String subject, String body, String pathImage)
             throws MessagingException {
         MimeMessage message = emailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, true);
@@ -84,6 +85,10 @@ public class EmailNotificationServiceImpl implements INotificationService {
         helper.setTo(to);
         helper.setSubject(subject);
         helper.setText(body, true);
+        if (pathImage != null) {
+            Resource resource = resourceLoader.getResource(pathImage);
+            helper.addInline("logoImage", resource);
+        }
         return message;
     }
 
