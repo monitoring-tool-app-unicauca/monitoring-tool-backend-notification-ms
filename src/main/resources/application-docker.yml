@@ -1,26 +1,26 @@
 server:
-  port: 8091
+  port: ${NOTIFICATION_PORT}
   servlet:
     context-path: /monitoring-tool-notification-ms
 
-logging:
-  level:
-    root: INFO
-
 spring:
   rabbitmq:
-    host: rabbitmq
-    port: 5672
-    username: guest
-    password: guest
+    host: ${RABBITMQ_HOST}
+    port: ${RABBITMQ_PORT}
+    username: ${RABBITMQ_USERNAME}
+    password: ${RABBITMQ_PASSWORD}
   mail:
-    host: smtp.gmail.com
-    port: 587
-    username: soporteactivate2022@gmail.com
-    password: eyhrfqrreyetmjah
+    host: ${MAIL_HOST}
+    port: ${MAIL_PORT}
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
     properties:
       mail:
         smtp:
           auth: true
           starttls:
             enable: true
+
+logging:
+  level:
+    root: ${DEBUG_LEVEL}
