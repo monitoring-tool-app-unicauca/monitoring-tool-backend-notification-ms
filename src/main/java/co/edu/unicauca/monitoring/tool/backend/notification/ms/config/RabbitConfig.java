@@ -21,6 +21,10 @@ public class RabbitConfig {
     public static final String PASSWORD_RECOVERY_EXCHANGE = "password.recovery.exchange";
 
 
+    public static final String WELCOME_PASSWORD_QUEUE = "welcome.password.queue";
+    public static final String ROUTING_KEY_WELCOME_PASSWORD = "welcome.password";
+    public static final String WELCOME_PASSWORD_EXCHANGE = "welcome.password.exchange";
+
     @Bean
     public TopicExchange passwordRecoveryExchange() {
         return new TopicExchange(PASSWORD_RECOVERY_EXCHANGE);
@@ -29,6 +33,11 @@ public class RabbitConfig {
     @Bean
     public TopicExchange healthEndpointExchange() {
         return new TopicExchange(HEALTH_ENDPOINT_EXCHANGE);
+    }
+
+    @Bean
+    public TopicExchange welcomePasswordExchange() {
+        return new TopicExchange(WELCOME_PASSWORD_EXCHANGE);
     }
 
 
@@ -45,6 +54,19 @@ public class RabbitConfig {
                 .to(healthEndpointExchange())
                 .with(ROUTING_KEY_HEALTH_ENDPOINT_DOWN);
     }
+
+    @Bean
+    public Binding bindingWelcomePassword() {
+        return BindingBuilder.bind(welcomePasswordQueue())
+                .to(welcomePasswordExchange())
+                .with(ROUTING_KEY_WELCOME_PASSWORD);
+    }
+
+    @Bean
+    public Queue welcomePasswordQueue() {
+        return new Queue(WELCOME_PASSWORD_QUEUE, true);
+    }
+
 
 
     @Bean

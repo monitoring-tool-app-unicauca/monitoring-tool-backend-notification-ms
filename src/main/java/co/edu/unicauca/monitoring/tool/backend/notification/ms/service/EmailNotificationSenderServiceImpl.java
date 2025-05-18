@@ -4,6 +4,7 @@ import co.edu.unicauca.monitoring.tool.backend.notification.ms.config.MessageLoa
 import co.edu.unicauca.monitoring.tool.backend.notification.ms.domain.HealthEndpointNotificationDto;
 import co.edu.unicauca.monitoring.tool.backend.notification.ms.domain.PasswordRecoveryDto;
 import co.edu.unicauca.monitoring.tool.backend.notification.ms.domain.To;
+import co.edu.unicauca.monitoring.tool.backend.notification.ms.domain.WelcomePasswordNotificationDto;
 import co.edu.unicauca.monitoring.tool.backend.notification.ms.util.MessagesConstants;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
@@ -40,7 +41,39 @@ public class EmailNotificationSenderServiceImpl implements INotificationSenderSe
             PasswordRecoveryDto passwordRecoveryPayload = (PasswordRecoveryDto) payload;
             sendPasswordRecoveryEmail(passwordRecoveryPayload, passwordRecoveryPayload.getRecipient());
         }
+        else if (payloadClass.equals(WelcomePasswordNotificationDto.class)) {
+            WelcomePasswordNotificationDto welcomePayload = (WelcomePasswordNotificationDto) payload;
+            sendWelcomePasswordEmail(welcomePayload, welcomePayload.getRecipient());
+        }
     }
+
+    private void sendWelcomePasswordEmail(WelcomePasswordNotificationDto payload, To recipient) {
+        try {
+            MimeMessage message = createMimeMessage(
+                    MessageLoader.getInstance().getMessage(MessagesConstants.IM002),
+                    recipient.getEmail(),
+                    MessageLoader.getInstance().getMessage(MessagesConstants.IM004),
+                    createWelcomePasswordEmailBody(payload),
+                    null
+            );
+            emailSender.send(message);
+        } catch (MessagingException e) {
+            handleEmailException(e, recipient);
+        }
+    }
+
+    private String createWelcomePasswordEmailBody(WelcomePasswordNotificationDto payload) {
+        try {
+            Resource resource = resourceLoader.getResource("classpath:templates/welcome-password.html");
+            String template = StreamUtils.copyToString(resource.getInputStream(), StandardCharsets.UTF_8);
+            return template.replace("{user}", payload.getRecipient().getName())
+                    .replace("{password}", payload.getGeneratedPassword());
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to read email template", e);
+        }
+    }
+
+
 
     /**
      * Sends an email notification to a specific recipient.
